@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using CartService.Models.Carts;
@@ -19,12 +19,17 @@ namespace CartService.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Cart>> GetAsync()
+        [ProducesResponseType(typeof(IEnumerable<Cart>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<Cart>>> GetAsync()
         {
             var carts = await _cartRepository.GetAsync();
 
-            return Ok(carts ?? Enumerable.Empty<Cart>());
+            if (carts != null)
+            {
+                return Ok(carts);
+            }
+
+            return NotFound();
         }
         
         [HttpGet("{id}")]
@@ -33,67 +38,77 @@ namespace CartService.Controllers
         {
             var cart = await _cartRepository.GetAsync(id);
 
-            return Ok(cart ?? new Cart());
+            if (cart != null)
+            {
+                return Ok(cart);
+            }
+
+            return NotFound();
         }
         
-
         [HttpPost]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Post([FromBody] Cart cart)
         {
-            try
-            {
-                await _cartRepository.CreateAsync(cart);
-                return Accepted();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return Problem();
-            }
+            var result = await _cartRepository.CreateAsync(cart);
             
+            if (result)
+            {
+                return Ok();
+            }
+
+            return Problem();
         }
 
         [HttpPatch]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Patch([FromBody] Cart cart)
         {
-            await _cartRepository.UpdateAsync(cart);
-            return Ok();
+            var result = await _cartRepository.UpdateAsync(cart);
+            
+            if (result)
+            {
+                return Ok();
+            }
+
+            return Problem();
         }
 
         [HttpPatch("{cartId}/products/{productId}")]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Patch(int cartId,int productId)
         {
-            await _cartRepository.AddProduct(cartId,productId);
+            var result = await _cartRepository.AddProduct(cartId,productId);
 
-            return Ok();
+            if (result)
+            {
+                return Ok();
+            }
+
+            return Problem();
         }
 
         [HttpDelete("{cartId}/products/{productId}")]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> DeleteAsync(int cartId, int productId)
         {
-            await _cartRepository.DeleteProduct(cartId, productId);
+            var result= await _cartRepository.DeleteProduct(cartId, productId);
 
-            return Ok();
+            if (result)
+            {
+                return Ok();
+            }
+
+            return Problem();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            try
+            var result=await _cartRepository.DeleteAsync(id);
+            
+            if (result)
             {
-                await _cartRepository.DeleteAsync(id);
-                return Accepted();
+                return Ok();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return Problem();
-            }
+
+            return Problem();
         }
     }
 }

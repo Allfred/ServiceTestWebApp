@@ -12,10 +12,10 @@ namespace CartService.BackgroundServices
 {
     public class ReportingService : BackgroundService
     {
-        private readonly Microsoft.AspNetCore.Hosting.IHostingEnvironment _hostingEnvironment;
+        private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _hostingEnvironment;
         private readonly ICartRepository _cartRepository;
 
-        public ReportingService(Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment, ICartRepository cartRepository)
+        public ReportingService(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment, ICartRepository cartRepository)
         {
             _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
             _cartRepository = cartRepository;

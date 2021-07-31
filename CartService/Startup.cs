@@ -51,17 +51,17 @@ namespace CartService
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/api/swagger.json", "Catalog API V1");
+                });
             }
 
             app.UseRouting();
 
             app.UseAuthorization();
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/api/swagger.json", "Catalog API V1");
-            });
-        
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

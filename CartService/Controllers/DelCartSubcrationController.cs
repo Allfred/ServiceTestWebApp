@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using CartService.Models.CartSubscribers;
 
@@ -18,35 +16,32 @@ namespace CartService.Controllers
         }
         
         [HttpPost]
-        [ProducesResponseType(typeof(CartSubscriber), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Post([FromBody] CartSubscriber cartSubscriber)
         {
-            try
+           
+            var result = await _cartSubscriberRepository.CreateAsync(cartSubscriber);
+            
+            if (result)
             {
-                await _cartSubscriberRepository.CreateAsync(cartSubscriber);
-                return Accepted();
+                return Ok();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return Problem();
-            }
+
+            return Problem();
         }
 
         [HttpDelete("{cartId}")]
-        [ProducesResponseType(typeof(CartSubscriber), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Delete(int cartId)
         {
-            try
+            
+            var result = await _cartSubscriberRepository.DeleteAsync(cartId);
+
+            if (result)
             {
-                await _cartSubscriberRepository.DeleteAsync(cartId);
-                return Accepted();
+                return Ok();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return Problem();
-            }
+
+            return Problem();
+ 
         }
     }
 }

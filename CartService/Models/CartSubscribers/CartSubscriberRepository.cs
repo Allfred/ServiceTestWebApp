@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using CartService.Models.Base;
 using Dapper;
 
 namespace CartService.Models.CartSubscribers
@@ -15,59 +17,78 @@ namespace CartService.Models.CartSubscribers
             _connectionString = connectionString;
         }
         
-        public async Task<int> CreateAsync(CartSubscriber cartSubscriber)
+        public async Task<bool> CreateAsync(CartSubscriber cartSubscriber)
         {
-            using (IDbConnection db = new SqlConnection(_connectionString))
+            var func = new Func<Task<int>>(async () =>
             {
-                var uspCreateCartSubscriber = "uspCreateCartSubscriber";
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
+                    var uspCreateCartSubscriber = "uspCreateCartSubscriber";
                 
-                var result = await db.ExecuteAsync(uspCreateCartSubscriber, new { cartSubscriber.CartId, cartSubscriber.ExecutingUrl},
-                    commandType: CommandType.StoredProcedure);
+                    return await db.ExecuteAsync(uspCreateCartSubscriber, new { cartSubscriber.CartId, cartSubscriber.ExecutingUrl},
+                        commandType: CommandType.StoredProcedure);
 
-                return result;
-            }
+                }
+            });
+            
+            return await TryCatchWrapper.Execute(func);
         }
 
         public async Task<CartSubscriber> GetAsync(int id)
         {
-            using (IDbConnection db = new SqlConnection(_connectionString))
+            var func = new Func<int, Task<CartSubscriber>>(async id =>
             {
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
 
-                var uspGetCartSubscriberById = "uspGetCartSubscriberById";
+                    var uspGetCartSubscriberById = "uspGetCartSubscriberById";
 
-                var cartSubscriber = await db.QueryFirstOrDefaultAsync<CartSubscriber>(uspGetCartSubscriberById, new { id },
-                    commandType: CommandType.StoredProcedure);
+                    var cartSubscriber = await db.QueryFirstOrDefaultAsync<CartSubscriber>(uspGetCartSubscriberById, new { id },
+                        commandType: CommandType.StoredProcedure);
                 
-                return cartSubscriber;
-            }
+                    return cartSubscriber;
+                }
+            });
+
+            return await TryCatchWrapper.Execute(func, id);
         }
 
         public async Task<IEnumerable<CartSubscriber>> GetAsync()
         {
-            using (IDbConnection db = new SqlConnection(_connectionString))
-            {
-                var uspGetCartSubscribers = "uspGetCartSubscribers";
 
-                var cartSubscribers = await db.QueryAsync<CartSubscriber>(uspGetCartSubscribers, 
-                    commandType: CommandType.StoredProcedure);
+            var func = new Func<Task<IEnumerable<CartSubscriber>>>(async () =>
+            {
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
+                    var uspGetCartSubscribers = "uspGetCartSubscribers";
+
+                    var cartSubscribers = await db.QueryAsync<CartSubscriber>(uspGetCartSubscribers, 
+                        commandType: CommandType.StoredProcedure);
                 
-                return cartSubscribers;
-            }
+                    return cartSubscribers;
+                }
+            });
+            return await TryCatchWrapper.Execute(func);
         }
 
-        public Task<int> UpdateAsync(CartSubscriber item)
+        public Task<bool> UpdateAsync(CartSubscriber item)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public async Task<int> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var uspDeleteCartSubscriberById = "uspDeleteCartSubscriberById";
-            
-            using (IDbConnection db = new SqlConnection(_connectionString))
+            var func = new Func<int, Task<int>>(async id =>
             {
-                return await db.ExecuteAsync(uspDeleteCartSubscriberById, new { id }, commandType: CommandType.StoredProcedure);
-            }
+                var uspDeleteCartSubscriberById = "uspDeleteCartSubscriberById";
+            
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
+                    return await db.ExecuteAsync(uspDeleteCartSubscriberById, new {id}, commandType: CommandType.StoredProcedure);
+                }  
+            });
+
+            return await TryCatchWrapper.Execute(func,id);
         }
     }
 }

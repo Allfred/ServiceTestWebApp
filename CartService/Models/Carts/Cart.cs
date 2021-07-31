@@ -7,6 +7,10 @@ namespace CartService.Models.Carts
 {
     public class Cart : IEntities
     {
+        public Cart()
+        {
+            Products = new List<Product>();
+        }
         public int Id { get; set; }
 
         public string Name { get; set; }

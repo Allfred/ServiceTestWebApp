@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using CartService.Models.Base;
 using Dapper;
 
 namespace CartService.Models.DelCartNotifications
@@ -15,37 +17,42 @@ namespace CartService.Models.DelCartNotifications
             _connectionString = connectionString;
         }
         
-        public async Task<int> CreateAsync(DelCartNotification item)
+        public async Task<bool> CreateAsync(DelCartNotification item)
         {
-            using (IDbConnection db = new SqlConnection(_connectionString))
-            {
-                var uspCreateDelCartNotification = "uspCreateDelCartNotification";
-                
-                var result = await db.ExecuteAsync(uspCreateDelCartNotification, new { item.Message },
-                    commandType: CommandType.StoredProcedure);
 
-                return result;
-            }
+            var func = new Func<DelCartNotification, Task<int>>(async item =>
+            {
+                using (IDbConnection db = new SqlConnection(_connectionString))
+                {
+                    var uspCreateDelCartNotification = "uspCreateDelCartNotification";
+                
+                    return await db.ExecuteAsync(uspCreateDelCartNotification, new { item.Message },
+                        commandType: CommandType.StoredProcedure);
+
+                }
+            });
+
+            return await TryCatchWrapper.Execute(func,item);
         }
 
         public Task<DelCartNotification> GetAsync(int id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<DelCartNotification>> GetAsync()
+        public Task<IEnumerable<DelCartNotification>> GetAsync()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<int> UpdateAsync(DelCartNotification item)
+        public Task<bool> UpdateAsync(DelCartNotification item)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public Task<int> DeleteAsync(int id)
+        public Task<bool> DeleteAsync(int id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

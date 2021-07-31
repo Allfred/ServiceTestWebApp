@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using CartService.Models.Carts;
@@ -20,12 +19,18 @@ namespace CartService.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<Cart>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Product>> Get()
         {
             var products = await _productRepository.GetAsync();
 
-            return Ok(products ?? Enumerable.Empty<Product>());
+            if (products != null)
+            {
+                return Ok(products);
+            }
+               
+            return NotFound();
+            
         }
 
         [HttpGet("{id}")]
@@ -33,56 +38,52 @@ namespace CartService.Controllers
         public async Task<ActionResult<Product>> Get(int id)
         {
             var product = await _productRepository.GetAsync(id);
-            
-            return Ok(product ?? new Product());
+
+            if (product != null)
+            {
+                return Ok(product);
+            }
+               
+            return NotFound();
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Post([FromBody] Product product)
         {
-            try
-            {
-                await _productRepository.CreateAsync(product);
-                return Accepted();
+            var result = await _productRepository.CreateAsync(product);
+            
+            if (result)
+            { 
+                return Ok();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return Problem();
-            }
+
+            return Problem();
         }
 
         [HttpPatch]
-        [ProducesResponseType(typeof(Cart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Patch([FromBody] Product product)
         {
-            try
+            var result = await _productRepository.UpdateAsync(product);
+            
+            if (result)
             {
-                await _productRepository.UpdateAsync(product);
-                return Accepted();
+                return Ok();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return Problem();
-            }
+
+            return Problem();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<ActionResult> Delete(int id)
         {
-            try
+            var result = await _productRepository.DeleteAsync(id);
+
+            if (result)
             {
-                await _productRepository.DeleteAsync(id);
-                return Accepted();
+                return Ok();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return Problem();
-            }
+
+            return Problem();
         }
     }
 }
