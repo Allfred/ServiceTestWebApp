@@ -1,0 +1,7 @@
+Report:
+Count of carts:4
+Count of carts with ForBonusPoints is true:2
+Count of carts expires in 10 days: 2
+Count of carts expires in 20 days: 3
+Count of carts expires in 30 days: 4
+Average check of carts:8,055555555555555555555555556
