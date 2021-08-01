@@ -11,10 +11,12 @@ namespace CartService.Models.Products
     public class ProductRepository:IProductRepository
     {
         private readonly string _connectionString;
+        private readonly ITryCatchWrapper _tryCatchWrapper;
 
-        public ProductRepository(string connectionString)
+        public ProductRepository(string connectionString,ITryCatchWrapper tryCatchWrapper)
         {
             _connectionString = connectionString;
+            _tryCatchWrapper = tryCatchWrapper;
         }
 
         public async Task<bool> CreateAsync(Product product)
@@ -31,7 +33,7 @@ namespace CartService.Models.Products
                 
             });
 
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
 
         public async Task<IEnumerable<Product>> GetAsync()
@@ -47,7 +49,7 @@ namespace CartService.Models.Products
                 }
             });
 
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
         
         public async Task<Product> GetAsync(int id)
@@ -64,7 +66,7 @@ namespace CartService.Models.Products
                 }
             });
             
-            return await TryCatchWrapper.Execute(func, id);
+            return await _tryCatchWrapper.Execute(func, id);
         }
 
         public async Task<bool> UpdateAsync(Product product)
@@ -81,7 +83,7 @@ namespace CartService.Models.Products
                 }
             });
 
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -96,7 +98,7 @@ namespace CartService.Models.Products
                 }  
             });
 
-            return await TryCatchWrapper.Execute(func,id);
+            return await _tryCatchWrapper.Execute(func,id);
         }
     }
 }

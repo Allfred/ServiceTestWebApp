@@ -11,10 +11,12 @@ namespace CartService.Models.DelCartNotifications
     public class DelCartNotificationRepository: IDelCartNotificationRepository
     {
         private readonly string _connectionString;
-        
-        public DelCartNotificationRepository(string connectionString)
+        private readonly ITryCatchWrapper _tryCatchWrapper;
+
+        public DelCartNotificationRepository(string connectionString, ITryCatchWrapper tryCatchWrapper)
         {
             _connectionString = connectionString;
+            _tryCatchWrapper = tryCatchWrapper;
         }
         
         public async Task<bool> CreateAsync(DelCartNotification item)
@@ -32,7 +34,7 @@ namespace CartService.Models.DelCartNotifications
                 }
             });
 
-            return await TryCatchWrapper.Execute(func,item);
+            return await _tryCatchWrapper.Execute(func,item);
         }
 
         public Task<DelCartNotification> GetAsync(int id)

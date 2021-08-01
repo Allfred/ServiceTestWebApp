@@ -3,8 +3,10 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CartService.Logging;
 using CartService.Models.Carts;
 using CartService.Models.WebHook;
+using Microsoft.Extensions.Logging;
 
 namespace CartService.BackgroundServices
 {
@@ -12,29 +14,31 @@ namespace CartService.BackgroundServices
     {
         private readonly ICartRepository _cartRepository;
         private readonly IDelCartWebHook _delCartWebHook;
+        private readonly ILogger<FileLogger> _fileLogger;
 
-        public CleaningService(ICartRepository cartRepository, IDelCartWebHook delCartWebHook)
+        public CleaningService(ICartRepository cartRepository, IDelCartWebHook delCartWebHook, ILogger<FileLogger> fileLogger)
         {
+            _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
             _cartRepository = cartRepository;
             _delCartWebHook = delCartWebHook;
         }
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("CleaningService is starting.");
+            _fileLogger.LogInformation("CleaningService is starting");
 
-            stoppingToken.Register(() => Console.WriteLine("CleaningService is stopping."));
+            stoppingToken.Register(() => _fileLogger.LogInformation("CleaningService is stopping"));
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("CleaningService is doing background work.");
+                _fileLogger.LogInformation("CleaningService is doing background work");
 
                 await CleanOldCarts();
 
                 await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
 
-            Console.WriteLine("CleaningService background task is stopping.");
+            _fileLogger.LogInformation("CleaningService background task is stopping");
         }
 
         private async Task CleanOldCarts()

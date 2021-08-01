@@ -1,4 +1,5 @@
 using CartService.BackgroundServices;
+using CartService.Models.Base;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using CartService.Models.CartSubscribers;
 using CartService.Models.DelCartNotifications;
 using CartService.Models.Products;
 using CartService.Models.WebHook;
+using CartService.Reporting;
 
 namespace CartService
 {
@@ -22,22 +24,31 @@ namespace CartService
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionString = "Data Source=DESKTOP-7A2QTBA;Initial Catalog=Test;Persist Security Info=True;Integrated Security=true; MultipleActiveResultSets=true;";
+            string connectionString = Configuration.GetConnectionString("connectionStringTest");
 
             services.AddControllers();
-            services.AddTransient<ICartRepository, CartRepository>(provider => new CartRepository(connectionString));
-            services.AddTransient<IProductRepository, ProductRepository>(provider => new ProductRepository(connectionString));
-            services.AddTransient<ICartSubscriberRepository, CartSubscriberRepository>(provider => new CartSubscriberRepository(connectionString));
-            services.AddTransient<IDelCartNotificationRepository, DelCartNotificationRepository>(provider => new DelCartNotificationRepository(connectionString));
+            
+            services.AddTransient<ITryCatchWrapper, TryCatchWrapper>();
+            
+            services.AddTransient<ICartRepository, CartRepository>(provider =>
+                new CartRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
+            services.AddTransient<IProductRepository, ProductRepository>(provider =>
+                new ProductRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
+            services.AddTransient<ICartSubscriberRepository, CartSubscriberRepository>(provider =>
+                new CartSubscriberRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
+            services.AddTransient<IDelCartNotificationRepository, DelCartNotificationRepository>( provider =>
+                new DelCartNotificationRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
+
+            services.AddHttpClient();
             services.AddTransient<IDelCartWebHook, DelCartWebHook>();
             
             services.AddHostedService<CleaningService>();
+
+            services.AddTransient<IReport<ICartRepository>, CartRepositoryReport>();
             services.AddHostedService<ReportingService>();
-            services.AddHttpClient();
-            
+
     
             services.AddSwaggerGen(c =>
             {
@@ -45,7 +56,6 @@ namespace CartService
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

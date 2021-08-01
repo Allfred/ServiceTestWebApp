@@ -12,10 +12,12 @@ namespace CartService.Models.Carts
     public class CartRepository : ICartRepository
     {
         private readonly string _connectionString;
+        private readonly ITryCatchWrapper _tryCatchWrapper;
 
-        public CartRepository(string connectionString)
+        public CartRepository(string connectionString, ITryCatchWrapper tryCatchWrapper)
         {
             _connectionString = connectionString;
+            _tryCatchWrapper = tryCatchWrapper;
         }
 
         public async Task<bool> CreateAsync(Cart cart)
@@ -33,7 +35,7 @@ namespace CartService.Models.Carts
                 }
             });
                  
-            return await TryCatchWrapper.Execute(func, cart);
+            return await _tryCatchWrapper.Execute(func, cart);
         }
 
         public async Task<Cart> GetAsync(int id)
@@ -58,7 +60,7 @@ namespace CartService.Models.Carts
                 }
             });
 
-            return await TryCatchWrapper.Execute(func, id);
+            return await _tryCatchWrapper.Execute(func, id);
         }
 
         public async Task<IEnumerable<Cart>> GetAsync()
@@ -86,7 +88,7 @@ namespace CartService.Models.Carts
                 }
             });
 
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
 
         public async Task<bool> UpdateAsync(Cart cart)
@@ -111,7 +113,7 @@ namespace CartService.Models.Carts
                 }
             });
             
-            return await TryCatchWrapper.Execute(func, cart);
+            return await _tryCatchWrapper.Execute(func, cart);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -126,7 +128,7 @@ namespace CartService.Models.Carts
                 }
             });
 
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
 
         public async Task<bool> AddProduct(int cartId, int productId)
@@ -142,7 +144,7 @@ namespace CartService.Models.Carts
                 }
             });
 
-            return await TryCatchWrapper.Execute(func, (cartId, productId));
+            return await _tryCatchWrapper.Execute(func, (cartId, productId));
         }
 
         public async Task<bool> DeleteProduct(int cartId, int productId)
@@ -158,7 +160,7 @@ namespace CartService.Models.Carts
                 }
             });
             
-            return await TryCatchWrapper.Execute(func, (cartId, productId));
+            return await _tryCatchWrapper.Execute(func, (cartId, productId));
         }
 
         private async Task AddToCartProduct(IDbConnection db, Cart cart)

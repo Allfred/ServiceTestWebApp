@@ -1,32 +1,33 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using CartService.Models.Carts;
 using CartService.Models.Products;
+using CartService.Reporting;
+using NUnit.Framework;
 
-namespace CartService.Reporting.Tests
+namespace CartServiceTests.Reporting
 {
-    [TestFixture()]
+    [TestFixture]
     public class CalculationsForReportingTests
     {
-        private static List<Product> products = new List<Product>()
+        private static List<Product> products = new()
         {
-            new Product(){Id=1,Name="1",Cost=3,ForBonusPoints=true},
-            new Product(){Id=2,Name="2",Cost=7,ForBonusPoints=false}
+            new Product {Id=1,Name="1",Cost=3,ForBonusPoints=true},
+            new Product {Id=2,Name="2",Cost=7,ForBonusPoints=false}
         };
 
-        private static List<Cart> carts = new List<Cart>() 
+        private static List<Cart> carts = new() 
         {
         
-            new Cart(){ Id=1,Name="1", CreatedDateTime = DateTime.Today.AddDays(-10), Products = new List<Product>()},
-            new Cart(){ Id=1,Name="2", CreatedDateTime = DateTime.Today.AddDays(-15), Products = products},
-            new Cart(){ Id=1,Name="3", CreatedDateTime = DateTime.Today.AddDays(-25), Products = products.Where(x=>x.ForBonusPoints)},
-            new Cart(){ Id=1,Name="4", CreatedDateTime = DateTime.Today.AddDays(-35), Products = products.Where(x=>!x.ForBonusPoints)},
+            new(){ Id=1,Name="1", CreatedDateTime = DateTime.Today.AddDays(-10), Products = new List<Product>()},
+            new(){ Id=1,Name="2", CreatedDateTime = DateTime.Today.AddDays(-15), Products = products},
+            new(){ Id=1,Name="3", CreatedDateTime = DateTime.Today.AddDays(-25), Products = products.Where(x=>x.ForBonusPoints)},
+            new(){ Id=1,Name="4", CreatedDateTime = DateTime.Today.AddDays(-35), Products = products.Where(x=>!x.ForBonusPoints)},
         
         };
 
-        [Test()]
+        [Test]
         public void CalcCartAverageCostTest()
         {
             var rightResult = 5;
@@ -34,7 +35,7 @@ namespace CartService.Reporting.Tests
             Assert.IsTrue(rightResult == result);
         }
 
-        [Test()]
+        [Test]
         public void CountOfCartsWithBonusTest()
         {
             var rightResult = 2;
@@ -43,7 +44,7 @@ namespace CartService.Reporting.Tests
             Assert.IsTrue(rightResult == result);
         }
 
-        [Test()]
+        [Test]
         public void CountOfСartExpiresInDaysTest()
         {
             var days = new List<int> { 10, 20, 30 };

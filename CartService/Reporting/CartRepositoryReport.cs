@@ -2,17 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CartService.Logging;
 using CartService.Models.Carts;
+using Microsoft.Extensions.Logging;
 
 namespace CartService.Reporting
 {
-    public class Report
+    public class CartRepositoryReport: IReport<ICartRepository>
     {
+        private readonly ILogger<FileLogger> _fileLogger;
         private string _path;
         
-        public Report(string path)
+        public CartRepositoryReport(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment, ILogger<FileLogger> fileLogger)
         {
-            _path = Path.Combine(path, "Reports");
+            _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
+            
+            _path = Path.Combine(hostingEnvironment.ContentRootPath, "Reports");
 
             if (!Directory.Exists(_path)) Directory.CreateDirectory(_path);
         
@@ -26,7 +31,10 @@ namespace CartService.Reporting
 
             if (!File.Exists(path))
             {
-                var carts=cartRepository.GetAsync().Result.ToList();
+                var carts=cartRepository
+                                                .GetAsync()
+                                                .Result
+                                                .ToList();
                 
                 string text = "Report:" + Environment.NewLine;
                 
@@ -41,13 +49,13 @@ namespace CartService.Reporting
                 try
                 {
                     File.WriteAllText(path, text);
-                    Console.WriteLine(reportName + " was created!");
+                    _fileLogger.LogInformation(reportName + " was created!");
                 }
                 
                 catch(Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    Console.WriteLine("Error!" + reportName + " was not created!");
+                    _fileLogger.LogInformation("Error!" + reportName + " was not created!");
                 }
             }
         }

@@ -1,43 +1,42 @@
 ﻿using CartService.Reporting;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CartService.Logging;
 using CartService.Models.Carts;
+using Microsoft.Extensions.Logging;
 
 namespace CartService.BackgroundServices
 {
     public class ReportingService : BackgroundService
     {
-        private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _hostingEnvironment;
         private readonly ICartRepository _cartRepository;
+        private ILogger<FileLogger> _fileLogger;
+        private readonly IReport<ICartRepository> _cartRepositoryReport;
 
-        public ReportingService(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment, ICartRepository cartRepository)
+        public ReportingService(ICartRepository cartRepository, ILogger<FileLogger> fileLogger,IReport<ICartRepository> cartRepositoryReport)
         {
-            _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
+            _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
+            _cartRepositoryReport = cartRepositoryReport;
             _cartRepository = cartRepository;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("ReportingService is starting.");
-
-            stoppingToken.Register(() => Console.WriteLine("ReportingService is stopping."));
+            _fileLogger.LogInformation("ReportingService is starting");
+            
+            stoppingToken.Register(() =>_fileLogger.LogInformation("ReportingService is stopping"));
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("ReportingService is doing background work.");
+                _fileLogger.LogInformation("ReportingService is doing background work");
 
-                var report = new Report(_hostingEnvironment.ContentRootPath);
-
-                report.Create(_cartRepository);
+                _cartRepositoryReport.Create(_cartRepository);
                 
                 await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
 
-            Console.WriteLine("ReportingService background task is stopping.");
+            _fileLogger.LogInformation("ReportingService background task is stopping");
         }
     }
 }

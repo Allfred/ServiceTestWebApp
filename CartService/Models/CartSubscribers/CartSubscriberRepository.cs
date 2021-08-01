@@ -11,10 +11,12 @@ namespace CartService.Models.CartSubscribers
     public class CartSubscriberRepository: ICartSubscriberRepository
     {
         private readonly string _connectionString;
+        private readonly ITryCatchWrapper _tryCatchWrapper;
 
-        public CartSubscriberRepository(string connectionString)
+        public CartSubscriberRepository(string connectionString, ITryCatchWrapper tryCatchWrapper)
         {
             _connectionString = connectionString;
+            _tryCatchWrapper = tryCatchWrapper;
         }
         
         public async Task<bool> CreateAsync(CartSubscriber cartSubscriber)
@@ -31,7 +33,7 @@ namespace CartService.Models.CartSubscribers
                 }
             });
             
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
 
         public async Task<CartSubscriber> GetAsync(int id)
@@ -50,7 +52,7 @@ namespace CartService.Models.CartSubscribers
                 }
             });
 
-            return await TryCatchWrapper.Execute(func, id);
+            return await _tryCatchWrapper.Execute(func, id);
         }
 
         public async Task<IEnumerable<CartSubscriber>> GetAsync()
@@ -68,7 +70,7 @@ namespace CartService.Models.CartSubscribers
                     return cartSubscribers;
                 }
             });
-            return await TryCatchWrapper.Execute(func);
+            return await _tryCatchWrapper.Execute(func);
         }
 
         public Task<bool> UpdateAsync(CartSubscriber item)
@@ -88,7 +90,7 @@ namespace CartService.Models.CartSubscribers
                 }  
             });
 
-            return await TryCatchWrapper.Execute(func,id);
+            return await _tryCatchWrapper.Execute(func,id);
         }
     }
 }

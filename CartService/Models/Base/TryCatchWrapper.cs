@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CartService.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace CartService.Models.Base
 {
-    public static class TryCatchWrapper
+    public class TryCatchWrapper: ITryCatchWrapper
     {
-        public static async Task<bool> Execute(Func<Task<int>> func)
+        private readonly ILogger<FileLogger> _fileLogger;
+
+        public TryCatchWrapper(ILogger<FileLogger> fileLogger)
+        {
+            _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
+        }
+        
+        public async Task<bool> Execute(Func<Task<int>> func)
         {
             try
             {
@@ -13,14 +22,14 @@ namespace CartService.Models.Base
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _fileLogger.LogError(e.Message);
                 return await Task.FromResult(false);
             }
 
             return await Task.FromResult(true);
         }
         
-        public static async Task<bool> Execute<T>(Func<T,Task> func, T item)
+        public async Task<bool> Execute<T>(Func<T,Task> func, T item)
         {
             try
             {
@@ -28,14 +37,14 @@ namespace CartService.Models.Base
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _fileLogger.LogError(e.Message);
                 return await Task.FromResult(false);
             }
 
             return await Task.FromResult(true);
         }
         
-        public static async Task<bool> Execute<T>(Func<T,Task<int>> func, T item)
+        public async Task<bool> Execute<T>(Func<T,Task<int>> func, T item)
         {
             try
             {
@@ -43,14 +52,14 @@ namespace CartService.Models.Base
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _fileLogger.LogError(e.Message);
                 return await Task.FromResult(false);
             }
 
             return await Task.FromResult(true);
         }
         
-        public static async Task<K> Execute<T,K>(Func<T, Task<K>> func, T item) where K: class
+        public async Task<K> Execute<T,K>(Func<T, Task<K>> func, T item) where K: class
         {
             try
             {
@@ -58,12 +67,12 @@ namespace CartService.Models.Base
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _fileLogger.LogError(e.Message);
                 return await Task.FromResult<K>(null);
             }
         }
         
-        public static async Task<K> Execute<K>(Func<Task<K>> func) where K: class
+        public async Task<K> Execute<K>(Func<Task<K>> func) where K: class
         {
             try
             {
@@ -71,7 +80,7 @@ namespace CartService.Models.Base
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _fileLogger.LogError(e.Message);
                 return await Task.FromResult<K>(null);
             }
         }
