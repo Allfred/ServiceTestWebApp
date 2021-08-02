@@ -49,66 +49,36 @@ namespace CartService.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Cart cart)
         {
-            var result = await _cartRepository.CreateAsync(cart);
-            
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _cartRepository.CreateAsync(cart);
+            return  Ok();
         }
 
         [HttpPatch]
         public async Task<ActionResult> Patch([FromBody] Cart cart)
         {
-            var result = await _cartRepository.UpdateAsync(cart);
-            
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _cartRepository.UpdateAsync(cart);
+            return Ok();
         }
 
         [HttpPatch("{cartId}/products/{productId}")]
         public async Task<ActionResult> Patch(int cartId,int productId)
         {
-            var result = await _cartRepository.AddProduct(cartId,productId);
-
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _cartRepository.AddProduct(cartId,productId);
+            return Ok();
         }
 
         [HttpDelete("{cartId}/products/{productId}")]
         public async Task<ActionResult> DeleteAsync(int cartId, int productId)
         {
-            var result= await _cartRepository.DeleteProduct(cartId, productId);
-
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _cartRepository.DeleteProduct(cartId, productId);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result=await _cartRepository.DeleteAsync(id);
-            
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _cartRepository.DeleteAsync(id);
+            return Ok();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace CartService.Models.Carts
 {
     public interface ICartRepository:IRepository<Cart>
     {
-       Task<bool> AddProduct(int cartId, int productId);
-       Task<bool> DeleteProduct(int cartId, int productId);
+       Task AddProduct(int cartId, int productId);
+       Task DeleteProduct(int cartId, int productId);
     }
 }

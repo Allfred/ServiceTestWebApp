@@ -18,30 +18,15 @@ namespace CartService.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] CartSubscriber cartSubscriber)
         {
-           
-            var result = await _cartSubscriberRepository.CreateAsync(cartSubscriber);
-            
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _cartSubscriberRepository.CreateAsync(cartSubscriber);
+            return Ok();
         }
 
         [HttpDelete("{cartId}")]
         public async Task<ActionResult> Delete(int cartId)
         {
-            
-            var result = await _cartSubscriberRepository.DeleteAsync(cartId);
-
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
- 
+            await _cartSubscriberRepository.DeleteAsync(cartId);
+            return Ok();
         }
     }
 }

@@ -5,15 +5,14 @@ namespace CartService.Models.Base
 {
     public interface IRepository<T> where T:class
     {
-        Task<bool> CreateAsync(T item);
+        Task CreateAsync(T item);
         
         Task<T> GetAsync(int id);
         
         Task<IEnumerable<T>> GetAsync();
 
-        Task<bool> UpdateAsync(T item);
+        Task UpdateAsync(T item);
 
-        Task<bool> DeleteAsync(int id);
-
+        Task DeleteAsync(int id);
     }
 }

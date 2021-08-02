@@ -18,14 +18,8 @@ namespace CartService.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] string message)
         {
-            var result = await _delCartNotificationRepository.CreateAsync(new DelCartNotification{ Message=message});
-
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _delCartNotificationRepository.CreateAsync(new DelCartNotification{ Message=message});
+            return Ok();
         }
     }
 }

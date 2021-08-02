@@ -50,40 +50,22 @@ namespace CartService.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Product product)
         {
-            var result = await _productRepository.CreateAsync(product);
-            
-            if (result)
-            { 
-                return Ok();
-            }
-
-            return Problem();
+            await _productRepository.CreateAsync(product);
+            return Ok();
         }
 
         [HttpPatch]
         public async Task<ActionResult> Patch([FromBody] Product product)
         {
-            var result = await _productRepository.UpdateAsync(product);
-            
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _productRepository.UpdateAsync(product);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var result = await _productRepository.DeleteAsync(id);
-
-            if (result)
-            {
-                return Ok();
-            }
-
-            return Problem();
+            await _productRepository.DeleteAsync(id);
+            return Ok();
         }
     }
 }

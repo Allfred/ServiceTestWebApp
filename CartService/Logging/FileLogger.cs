@@ -29,7 +29,7 @@ namespace CartService.Logging
             {
                 lock (_lock)
                 {
-                    var content = DateTime.Now + ":" + formatter(state, exception) + Environment.NewLine;
+                    var content = DateTime.Now + " " + logLevel+": "+ formatter(state, exception) + Environment.NewLine;
                     File.AppendAllText(filePath,content);
                 }
             }

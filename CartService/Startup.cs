@@ -1,4 +1,6 @@
 using CartService.BackgroundServices;
+using CartService.Middleware;
+using CartService.Middleware.Exception;
 using CartService.Models.Base;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,16 +32,14 @@ namespace CartService
 
             services.AddControllers();
             
-            services.AddTransient<ITryCatchWrapper, TryCatchWrapper>();
-            
-            services.AddTransient<ICartRepository, CartRepository>(provider =>
-                new CartRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
-            services.AddTransient<IProductRepository, ProductRepository>(provider =>
-                new ProductRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
-            services.AddTransient<ICartSubscriberRepository, CartSubscriberRepository>(provider =>
-                new CartSubscriberRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
-            services.AddTransient<IDelCartNotificationRepository, DelCartNotificationRepository>( provider =>
-                new DelCartNotificationRepository(connectionString,provider.GetService<ITryCatchWrapper>()));
+            services.AddTransient<ICartRepository, CartRepository>(_ =>
+                new CartRepository(connectionString));
+            services.AddTransient<IProductRepository, ProductRepository>(_ =>
+                new ProductRepository(connectionString));
+            services.AddTransient<ICartSubscriberRepository, CartSubscriberRepository>(_ =>
+                new CartSubscriberRepository(connectionString));
+            services.AddTransient<IDelCartNotificationRepository, DelCartNotificationRepository>( _ =>
+                new DelCartNotificationRepository(connectionString));
 
             services.AddHttpClient();
             services.AddTransient<IDelCartWebHook, DelCartWebHook>();
@@ -67,6 +67,8 @@ namespace CartService
                     c.SwaggerEndpoint("/swagger/api/swagger.json", "Catalog API V1");
                 });
             }
+
+            app.ConfigureCustomExceptionMiddleware();
 
             app.UseRouting();
 
