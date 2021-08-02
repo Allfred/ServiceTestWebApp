@@ -26,7 +26,7 @@ namespace CartService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionString = Configuration.GetConnectionString("connectionStringTest");
+            string connectionString = Configuration.GetConnectionString("connectionStringTest2");
 
             services.AddControllers();
             
