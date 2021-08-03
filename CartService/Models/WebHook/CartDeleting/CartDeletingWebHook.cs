@@ -2,34 +2,34 @@
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CartService.Models.CartSubscribers;
+using CartService.Models.WebHook.Common;
 
-namespace CartService.Models.WebHook
+namespace CartService.Models.WebHook.CartDeleting
 {
-    public class DelCartWebHook: IDelCartWebHook
+    public class CartDeletingWebHook: ICartDeletingWebHook
     {
-        private readonly ICartSubscriberRepository _cartSubscriberRepository;
+        private readonly IWebHookRepository _webHookRepository;
         private readonly HttpClient _client;
 
-
-        public DelCartWebHook(ICartSubscriberRepository cartSubscriberRepository,IHttpClientFactory httpClientFactory)
+        public CartDeletingWebHook(IWebHookRepository webHookRepository, IHttpClientFactory httpClientFactory)
         {
-            _cartSubscriberRepository = cartSubscriberRepository;
+            _webHookRepository = webHookRepository;
             _client = httpClientFactory.CreateClient();
         }
 
+        public WebHookType WebHookType => WebHookType.CartDeleting;
+
         public async Task Execute(int cartId)
         {
+            var webHook = await _webHookRepository.GetAsync(cartId, WebHookType);
 
-            var cartSubscriber = _cartSubscriberRepository.GetAsync(cartId);
-
-            if (cartSubscriber.Result != null)
+            if (webHook != null)
             {
                 var message = $"Cart:{cartId} was deleted";
-                
+
                 string jsonRequest = JsonSerializer.Serialize(message);
                 
-                await PostRequestAsync(cartSubscriber.Result.ExecutingUrl, jsonRequest);
+                await PostRequestAsync(webHook.ExecutingUri, jsonRequest);
             }
         }
         

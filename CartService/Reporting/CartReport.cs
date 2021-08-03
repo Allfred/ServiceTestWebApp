@@ -2,28 +2,30 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using CartService.Logging;
 using CartService.Models.Carts;
 using Microsoft.Extensions.Logging;
 
 namespace CartService.Reporting
 {
-    public class CartRepositoryReport: IReport<ICartRepository>
+    public class CartReport: IReport
     {
         private readonly ILogger<FileLogger> _fileLogger;
+        private readonly ICartRepository _cartRepository;
         private string _path;
         
-        public CartRepositoryReport(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment, ILogger<FileLogger> fileLogger)
+        public CartReport(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment, ILogger<FileLogger> fileLogger, ICartRepository cartRepository)
         {
             _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
-            
+            _cartRepository = cartRepository;
+
             _path = Path.Combine(hostingEnvironment.ContentRootPath, "Reports");
 
             if (!Directory.Exists(_path)) Directory.CreateDirectory(_path);
-        
         }
 
-        public void Create(ICartRepository cartRepository)
+        public async Task Create()
         {
             var reportName = "Report" + DateTime.Today.ToString("dd/MM/yyyy") + ".txt";
 
@@ -31,10 +33,7 @@ namespace CartService.Reporting
 
             if (!File.Exists(path))
             {
-                var carts=cartRepository
-                                                .GetAsync()
-                                                .Result
-                                                .ToList();
+                var carts= (await _cartRepository.GetAsync()).ToList();
                 
                 string text = "Report:" + Environment.NewLine;
                 
@@ -62,14 +61,14 @@ namespace CartService.Reporting
 
         private string ReportCartsCount(List<Cart> carts)
         {
-            return $"Count of carts:{carts.Count}"+ Environment.NewLine;
+            return $"Count of carts: {carts.Count}"+ Environment.NewLine;
         }
         
         private string ReportOfCartsWithBonusCount(List<Cart> carts)
         {
             var count = CalculationsForReporting.CountOfCartsWithBonus(carts);
                 
-            return $"Count of carts with ForBonusPoints is true:{count}"+ Environment.NewLine;
+            return $"Count of carts with ForBonusPoints is true: {count}"+ Environment.NewLine;
         }
 
         private string ReportOfСartExpiresInDays(List<Cart> carts)
@@ -92,7 +91,7 @@ namespace CartService.Reporting
         {
             var average = CalculationsForReporting.CalcCartAverageCost(carts);
 
-            return $"Average check of carts:{average}" + Environment.NewLine;
+            return $"Average check of carts: {average}" + Environment.NewLine;
         }
     }
 }

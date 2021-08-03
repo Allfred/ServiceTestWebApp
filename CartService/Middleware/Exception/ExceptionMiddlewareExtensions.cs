@@ -4,7 +4,7 @@ namespace CartService.Middleware.Exception
 {
     public static class ExceptionMiddlewareExtensions
     {
-        public static void ConfigureCustomExceptionMiddleware(this IApplicationBuilder app)
+        public static void UseExceptionMiddleware(this IApplicationBuilder app)
         {
             app.UseMiddleware<ExceptionMiddleware>();
         }

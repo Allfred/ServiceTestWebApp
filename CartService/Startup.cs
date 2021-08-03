@@ -1,7 +1,5 @@
 using CartService.BackgroundServices;
-using CartService.Middleware;
 using CartService.Middleware.Exception;
-using CartService.Models.Base;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using CartService.Models.Carts;
-using CartService.Models.CartSubscribers;
-using CartService.Models.DelCartNotifications;
+using CartService.Models.Notifications;
 using CartService.Models.Products;
-using CartService.Models.WebHook;
+using CartService.Models.WebHook.CartDeleting;
+using CartService.Models.WebHook.Common;
 using CartService.Reporting;
 
 namespace CartService
@@ -28,31 +26,25 @@ namespace CartService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionString = Configuration.GetConnectionString("connectionStringTest2");
+            string connectionString = Configuration.GetConnectionString("connectionStringTest");
 
             services.AddControllers();
             
-            services.AddTransient<ICartRepository, CartRepository>(_ =>
-                new CartRepository(connectionString));
-            services.AddTransient<IProductRepository, ProductRepository>(_ =>
-                new ProductRepository(connectionString));
-            services.AddTransient<ICartSubscriberRepository, CartSubscriberRepository>(_ =>
-                new CartSubscriberRepository(connectionString));
-            services.AddTransient<IDelCartNotificationRepository, DelCartNotificationRepository>( _ =>
-                new DelCartNotificationRepository(connectionString));
+            services.AddTransient<ICartRepository, CartRepository>(_ => new CartRepository(connectionString));
+            services.AddTransient<IProductRepository, ProductRepository>(_ => new ProductRepository(connectionString));
+            services.AddTransient<IWebHookRepository, WebHookRepository>(_ => new WebHookRepository(connectionString));
+            services.AddTransient<INotificationRepository, NotificationRepository>( _ => new NotificationRepository(connectionString));
+            services.AddTransient<ICartDeletingWebHook, CartDeletingWebHook>();
+            services.AddTransient<IReport, CartReport>();
 
             services.AddHttpClient();
-            services.AddTransient<IDelCartWebHook, DelCartWebHook>();
             
             services.AddHostedService<CleaningService>();
-
-            services.AddTransient<IReport<ICartRepository>, CartRepositoryReport>();
             services.AddHostedService<ReportingService>();
 
-    
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("api", new OpenApiInfo { Title = "Catalog API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog API", Version = "v1" });
             });
         }
 
@@ -64,11 +56,11 @@ namespace CartService
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/api/swagger.json", "Catalog API V1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog API V1");
                 });
             }
 
-            app.ConfigureCustomExceptionMiddleware();
+            app.UseExceptionMiddleware();
 
             app.UseRouting();
 

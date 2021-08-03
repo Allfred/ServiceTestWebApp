@@ -1,7 +1,9 @@
-﻿namespace CartService.Reporting
+﻿using System.Threading.Tasks;
+
+namespace CartService.Reporting
 {
-    public interface IReport<T>
+    public interface IReport
     {
-        void Create(T item);
+        Task Create();
     }
 }

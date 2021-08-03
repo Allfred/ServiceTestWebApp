@@ -5,39 +5,39 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 
-namespace CartService.Models.DelCartNotifications
+namespace CartService.Models.Notifications
 {
-    public class DelCartNotificationRepository: IDelCartNotificationRepository
+    public class NotificationRepository: INotificationRepository
     {
         private readonly string _connectionString;
 
-        public DelCartNotificationRepository(string connectionString)
+        public NotificationRepository(string connectionString)
         {
             _connectionString = connectionString;
         }
         
-        public async Task CreateAsync(DelCartNotification item)
+        public async Task CreateAsync(Notification item)
         {
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
-                var uspCreateDelCartNotification = "uspCreateDelCartNotification";
+                var uspCreateNotification = "uspCreateNotification";
                 
-                await db.ExecuteAsync(uspCreateDelCartNotification, new { item.Message },
+                await db.ExecuteAsync(uspCreateNotification, new { item.Message },
                     commandType: CommandType.StoredProcedure);
             }
         }
 
-        public Task<DelCartNotification> GetAsync(int id)
+        public Task<Notification> GetAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<DelCartNotification>> GetAsync()
+        public Task<IEnumerable<Notification>> GetAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(DelCartNotification item)
+        public Task UpdateAsync(Notification item)
         {
             throw new NotImplementedException();
         }

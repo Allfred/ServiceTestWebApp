@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace CartService.Models.DelCartNotifications
+namespace CartService.Models.Notifications
 {
-    public class DelCartNotification
+    public class Notification
     {
         public string Message { get; set; }
         

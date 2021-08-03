@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CartService.Logging;
 using CartService.Models.Carts;
-using CartService.Models.WebHook;
+using CartService.Models.WebHook.CartDeleting;
 using Microsoft.Extensions.Logging;
 
 namespace CartService.BackgroundServices
@@ -13,14 +13,14 @@ namespace CartService.BackgroundServices
     public class CleaningService : BackgroundService
     {
         private readonly ICartRepository _cartRepository;
-        private readonly IDelCartWebHook _delCartWebHook;
+        private readonly ICartDeletingWebHook _cartDeletingWebHook;
         private readonly ILogger<FileLogger> _fileLogger;
 
-        public CleaningService(ICartRepository cartRepository, IDelCartWebHook delCartWebHook, ILogger<FileLogger> fileLogger)
+        public CleaningService(ICartRepository cartRepository, ICartDeletingWebHook cartDeletingWebHook, ILogger<FileLogger> fileLogger)
         {
             _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
             _cartRepository = cartRepository;
-            _delCartWebHook = delCartWebHook;
+            _cartDeletingWebHook = cartDeletingWebHook;
         }
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -45,15 +45,14 @@ namespace CartService.BackgroundServices
         {
             var days = 30;
             var dateTimeNow = DateTime.Now;
-            var carts = _cartRepository.GetAsync()
-                .Result
+            var carts = (await _cartRepository.GetAsync())
                 .Where(cart => (dateTimeNow - cart.CreatedDateTime).Days > days)
                 .Select(x => x.Id);
-            
+
             foreach (var id in carts)
             {
                 await _cartRepository.DeleteAsync(id);
-                await _delCartWebHook.Execute(id);
+                await _cartDeletingWebHook.Execute(id);
             }
         }
     }

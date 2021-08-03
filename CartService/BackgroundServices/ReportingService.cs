@@ -4,22 +4,19 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CartService.Logging;
-using CartService.Models.Carts;
 using Microsoft.Extensions.Logging;
 
 namespace CartService.BackgroundServices
 {
     public class ReportingService : BackgroundService
     {
-        private readonly ICartRepository _cartRepository;
         private ILogger<FileLogger> _fileLogger;
-        private readonly IReport<ICartRepository> _cartRepositoryReport;
+        private readonly IReport _cartReport;
 
-        public ReportingService(ICartRepository cartRepository, ILogger<FileLogger> fileLogger,IReport<ICartRepository> cartRepositoryReport)
+        public ReportingService(ILogger<FileLogger> fileLogger,IReport cartReport)
         {
             _fileLogger = fileLogger ?? throw new ArgumentNullException(nameof(fileLogger));
-            _cartRepositoryReport = cartRepositoryReport;
-            _cartRepository = cartRepository;
+            _cartReport = cartReport;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -31,7 +28,7 @@ namespace CartService.BackgroundServices
             {
                 _fileLogger.LogInformation("ReportingService is doing background work");
 
-                _cartRepositoryReport.Create(_cartRepository);
+                await _cartReport.Create();
                 
                 await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
